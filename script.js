@@ -17,6 +17,8 @@ function renderQuestion(q) {
   const choicesList = document.getElementById('choices');
   const answerDiv = document.getElementById('answer');
   const explanationDiv = document.getElementById('explanation');
+  attachTranslationClickHandlers(q);
+
 
   qContainer.innerHTML = q.question;
   choicesList.innerHTML = '';
@@ -39,7 +41,18 @@ function renderQuestion(q) {
     choicesList.appendChild(li);
   });
 
+  function attachTranslationClickHandlers(q) {
   document.querySelectorAll('ruby').forEach(ruby => {
+    ruby.addEventListener('click', () => {
+      const word = ruby.textContent.trim();
+      const baseWord = Object.keys(q.translations).find(k => word.includes(k));
+      if (baseWord && q.translations[baseWord]) {
+        alert(`${baseWord}: ${q.translations[baseWord]}`);
+      }
+    });
+  });
+}
+
     ruby.addEventListener('click', () => {
       const word = ruby.textContent.trim();
       const baseWord = Object.keys(q.translations).find(k => word.includes(k));
