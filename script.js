@@ -1,7 +1,15 @@
-function getTodaysQuestion() {
+function getDayOfYear(offset = 0) {
   const today = new Date();
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-  return questions[dayOfYear % questions.length];
+  const start = new Date(today.getFullYear(), 0, 0);
+  const diff = today - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const day = Math.floor(diff / oneDay);
+  return (day + offset + questions.length) % questions.length;
+}
+
+function getQuestionByDay(offset = 0) {
+  const index = getDayOfYear(offset);
+  return questions[index];
 }
 
 function renderQuestion(q) {
@@ -31,7 +39,6 @@ function renderQuestion(q) {
     choicesList.appendChild(li);
   });
 
-  // Word click-to-translate
   document.querySelectorAll('ruby').forEach(ruby => {
     ruby.addEventListener('click', () => {
       const word = ruby.textContent.trim();
@@ -43,7 +50,31 @@ function renderQuestion(q) {
   });
 }
 
+function updateCountdown() {
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  const diff = midnight - now;
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById('countdown').textContent = `Next question in: ${hours}h ${minutes}m ${seconds}s`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  const q = getTodaysQuestion();
-  renderQuestion(q);
+  let offset = 0;
+  const question = getQuestionByDay(offset);
+  renderQuestion(question);
+
+  const toggleBtn = document.getElementById('toggle-day');
+  toggleBtn.addEventListener('click', () => {
+    offset = offset === 0 ? -1 : 0;
+    toggleBtn.textContent = offset === 0 ? 'See Yesterday\'s Question' : 'Back to Today\'s Question';
+    renderQuestion(getQuestionByDay(offset));
+  });
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 });
